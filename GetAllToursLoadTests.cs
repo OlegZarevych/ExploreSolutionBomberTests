@@ -9,7 +9,7 @@ using Xunit;
 
 namespace ExploreSolutionBomberTests
 {
-    public class UnitTest1
+    public class GetAllToursLoadTests
     {
         //[Fact]
         public void Test1()
@@ -23,12 +23,13 @@ namespace ExploreSolutionBomberTests
             );
 
             var scenario = ScenarioBuilder.CreateScenario("test_nbomber", new[] { step })
-//                .WithConcurrentCopies(100)
-.WithLoadSimulations()
-                .WithWarmUpDuration(TimeSpan.FromSeconds(10));
-  //              .WithDuration(TimeSpan.FromSeconds(20));
+                .WithWarmUpDuration(TimeSpan.FromSeconds(10))
+                .WithLoadSimulations(new[]
+                {
+                    Simulation.InjectPerSec(10, TimeSpan.FromSeconds(10))
+                }); 
 
-//            NBomberRunner.RegisterScenarios(scenario).RunInConsole();
+            NBomberRunner.RegisterScenarios(scenario).Run();
         }
 
         [Fact]
@@ -60,12 +61,14 @@ namespace ExploreSolutionBomberTests
             });
 
 
-            var scenario = ScenarioBuilder.CreateScenario("Get All Tours", new[] { loginStep, getAllTours });
-//                .WithAssertions()
-//                .WithConcurrentCopies(1)
-//                .WithDuration(TimeSpan.FromMinutes(1));
-
-//            NBomberRunner.RegisterScenarios(scenario).RunTest();
+            var scenario = ScenarioBuilder.CreateScenario("Get All Tours", new[] { loginStep, getAllTours })
+                .WithoutWarmUp()
+                .WithLoadSimulations(new[]
+                {
+                    Simulation.KeepConstant(1, TimeSpan.FromMinutes(1))
+                });
+                
+            var nodeStats = NBomberRunner.RegisterScenarios(scenario).Run();
         }
     }
 
